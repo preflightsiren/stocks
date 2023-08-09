@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	av "github.com/preflightsiren/stocks/pkg/alphavantage"
+	"github.com/preflightsiren/stocks/pkg/stocks"
 )
 
 type Server struct {
@@ -36,7 +37,7 @@ func (s *Server) Start() {
             w.WriteHeader(http.StatusServiceUnavailable)
             io.WriteString(w, err.Error())
         }
-        resp_string, err := json.Marshal(resp.Data)
+        resp_string, err := json.Marshal(stocks.AverageResults(resp, s.Ndays))
 		io.WriteString(w, string(resp_string))
 	}
 	h2 := func(w http.ResponseWriter, _ *http.Request) {
