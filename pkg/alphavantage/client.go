@@ -16,10 +16,10 @@ type HTTPClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
-type client struct {
-	api_key string
-	host    string
-	client  HTTPClient
+type Client struct {
+	Api_key string
+	Host    string
+	Client  HTTPClient
 }
 
 type Result struct {
@@ -35,24 +35,28 @@ type Day struct {
 	Volume string `json:"5. volume"`
 }
 
-func NewClient() *client {
-	return &client{
-		api_key: "C227WD9W3LUVKVV9",
-		host:    "https://www.alphavantage.co/",
-		client:  http.DefaultClient,
+func NewClient() *Client {
+	return &Client{
+		Api_key: "C227WD9W3LUVKVV9",
+		Host:    "https://www.alphavantage.co/",
+		Client:  http.DefaultClient,
 	}
 
 }
 
-func (c *client) Get() (*Result, error) {
+func (c *Client) Get() (*Result, error) {
+    return c.GetSymbol("MSFT")
+}
+
+func (c *Client) GetSymbol(Symbol string) (*Result, error) {
 	//query?apikey=C227WD9W3LUVKVV9&function=TIME_SERIES_DAILY&symbol=MSFT
-	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/query?apikey=%s&function=TIME_SERIES_DAILY&symbol=%s", c.host, c.api_key, "MSFT"), nil)
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/query?apikey=%s&function=TIME_SERIES_DAILY&symbol=%s", c.Host, c.Api_key, Symbol), nil)
 	if err != nil {
 		log.Printf("Failed to construct request\n")
 		return nil, err
 	}
 
-	res, err := c.client.Do(req)
+	res, err := c.Client.Do(req)
 
 	if err != nil {
 		log.Printf("Error from server %s\n", err)

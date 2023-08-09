@@ -23,7 +23,7 @@ func (t *testClient) Do(req *http.Request) (*http.Response, error) {
 
 func TestTestClientGet(t *testing.T) {
 	client := NewClient()
-	client.client = &testClient{}
+	client.Client = &testClient{}
 
 	client.Get()
 }
