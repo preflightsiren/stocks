@@ -1,12 +1,13 @@
 package av
 
 import (
-    "bytes"
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
-    "encoding/json"
+    "crypto/tls"
 )
 
 var ()
@@ -23,8 +24,8 @@ type Client struct {
 }
 
 type Result struct {
-    Meta interface{} `json:"Meta Data,omitempty"`
-    Data map[string]Day `json:"Time Series (Daily),omitempty"`
+	Meta interface{}    `json:"Meta Data,omitempty"`
+	Data map[string]Day `json:"Time Series (Daily),omitempty"`
 }
 
 type Day struct {
@@ -39,13 +40,18 @@ func NewClient() *Client {
 	return &Client{
 		Api_key: "C227WD9W3LUVKVV9",
 		Host:    "https://www.alphavantage.co/",
-		Client:  http.DefaultClient,
+        // Skipping validation of TLS certificates for now
+        // allows use of scratch images. Would need to copy the CA root into
+        // scratch image
+		Client: &http.Client{Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}},
 	}
 
 }
 
 func (c *Client) Get() (*Result, error) {
-    return c.GetSymbol("MSFT")
+	return c.GetSymbol("MSFT")
 }
 
 func (c *Client) GetSymbol(Symbol string) (*Result, error) {
@@ -64,8 +70,8 @@ func (c *Client) GetSymbol(Symbol string) (*Result, error) {
 	}
 
 	resBody, err := io.ReadAll(res.Body)
-    result := Result{}
-    err = json.NewDecoder(bytes.NewReader(resBody)).Decode(&result)
+	result := Result{}
+	err = json.NewDecoder(bytes.NewReader(resBody)).Decode(&result)
 
 	return &result, err
 }
